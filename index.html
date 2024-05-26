@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício de Ditado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .dictation-box, .input-box, .corrections-box {
+            margin: 20px 0;
+        }
+        .dictation-box, .input-box {
+            display: inline-block;
+            width: 60%;
+            vertical-align: top;
+        }
+        .corrections-box {
+            display: inline-block;
+            width: 30%;
+            vertical-align: top;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        .buttons button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercício de Ditado</h1>
+        <div class="buttons">
+            <button onclick="startDictation()">Iniciar Ditado</button>
+            <button onclick="stopAudio()">Parar Áudio</button>
+        </div>
+        <div class="dictation-box">
+            <h2>Texto do Ditado</h2>
+            <textarea id="textDisplay" readonly></textarea>
+        </div>
+        <div class="input-box">
+            <h2>Sua Resposta</h2>
+            <textarea id="textEntry"></textarea>
+        </div>
+        <div class="buttons">
+            <button onclick="checkAnswer()">Verificar Resposta</button>
+        </div>
+        <div class="corrections-box">
+            <h2>Correções</h2>
+            <textarea id="correctionsDisplay" readonly></textarea>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let audio;
+
+        function startDictation() {
+            const text = `Les découvertes des scientifiques ne sont pas toujours en accord avec les intérêts socioéconomiques ou politiques. En outre, la société est parfois plus encline à adhérer aux discours de charlatans qu’à écouter la raison et accepter les arguments et les faits qu’ils avancent. Les chercheurs s’aperçoivent ainsi qu’il est difficile d’être entendus. Pour pouvoir instaurer un dialogue avec la communauté, ils doivent rendre accessibles leurs connaissances, mais aussi se transformer en lanceurs d’alerte en expliquant quelles peuvent être les implications de leurs découvertes. Si quelques-uns refusent de s’engager et pensent que le message scientifique doit être neutre et reposer uniquement sur des faits pour être crédible, d’autres croient qu’il faut choisir un camp quand les conséquences sont graves et avérées. Pour ce qui est des projections socioéconomiques liées au changement climatique, elles ne peuvent pas toujours être validées, car on manque d’instruments scientifiques pour cela. C’est alors que la société doit comprendre la différence entre ce qui relève de la connaissance scientifique, ce qui concerne la recherche et ce qui est du ressort de la préconisation, sans oublier que la réception du message dépendra également de la personnalité et de la position sociale de l’interlocuteur. Par ailleurs, la propre recherche scientifique a un impact sur l’environnement que les chercheurs doivent prendre en compte pour montrer l’exemple, sans que leur travail en soit toutefois affecté. Ainsi, ils se retrouvent eux-mêmes confrontés à des contradictions dans l’exercice de leurs fonctions, ce qui est une vieille bataille, mais qui redevient particulièrement apparent avec les questions environnementales.`;
+
+            document.getElementById('textDisplay').value = text;
+
+            audio = new Audio('dictation.mp3'); // path to your audio file
+            audio.play();
+        }
+
+        function stopAudio() {
+            if (audio) {
+                audio.pause();
+            }
+        }
+
+        function checkAnswer() {
+            const correctText = `Les découvertes des scientifiques ne sont pas toujours en accord avec les intérêts socioéconomiques ou politiques. En outre, la société est parfois plus encline à adhérer aux discours de charlatans qu’à écouter la raison et accepter les arguments et les faits qu’ils avancent. Les chercheurs s’aperçoivent ainsi qu’il est difficile d’être entendus. Pour pouvoir instaurer un dialogue avec la communauté, ils doivent rendre accessibles leurs connaissances, mais aussi se transformer en lanceurs d’alerte en expliquant quelles peuvent être les implications de leurs découvertes. Si quelques-uns refusent de s’engager et pensent que le message scientifique doit être neutre et reposer uniquement sur des faits pour être crédible, d’autres croient qu’il faut choisir un camp quand les conséquences sont graves et avérées. Pour ce qui est des projections socioéconomiques liées au changement climatique, elles ne peuvent pas toujours être validées, car on manque d’instruments scientifiques pour cela. C’est alors que la société doit comprendre la différence entre ce qui relève de la connaissance scientifique, ce qui concerne la recherche et ce qui est du ressort de la préconisation, sans oublier que la réception du message dépendra également de la personnalité et de la position sociale de l’interlocuteur. Par ailleurs, la propre recherche scientifique a un impact sur l’environnement que les chercheurs doivent prendre en compte pour montrer l’exemple, sans que leur trabalho en soit toutefois affecté. Ainsi, ils se retrouvent eux-mêmes confrontés à des contradictions dans l’exercice de leurs fonctions, ce qui est une vieille bataille, mais qui redevient particulièrement apparent avec les questions environnementales.`;
+
+            const userText = document.getElementById('textEntry').value.trim();
+            const userWords = userText.split(/\s+/);
+            const correctWords = correctText.split(/\s+/);
+
+            let errors = [];
+            for (let i = 0; i < correctWords.length; i++) {
+                if (userWords[i] !== correctWords[i]) {
+                    errors.push({ index: i, userWord: userWords[i], correctWord: correctWords[i] });
+                }
+            }
+
+            const resultElement = document.getElementById('result');
+            if (errors.length === 0) {
+                resultElement.innerHTML = '<p style="color: green;">Correto!</p>';
+            } else {
+                let errorCount = errors.length;
+                let score = 15 - 0.5 * errorCount;
+                let percentage = (score / 15 * 100).toFixed(2);
+                resultElement.innerHTML = `<p style="color: red;">Incorreto! ${score.toFixed(2)}/15.00 = ${percentage}%</p>`;
+                
+                const correctionsDisplay = document.getElementById('correctionsDisplay');
+                correctionsDisplay.value = 'Erros encontrados:\n';
+                errors.forEach(error => {
+                    correctionsDisplay.value += `${error.userWord} (correção: ${error.correctWord})\n`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
